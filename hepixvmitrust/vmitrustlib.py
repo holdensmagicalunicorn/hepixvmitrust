@@ -20,6 +20,9 @@ else:
 
 import datetime
 
+# we need to import this if we want to verify signatures
+from smimeX509validation import TrustAnchor, SmimeX509ValidationError
+
 endorser_required_metadata = [u'hv:ca',
         u'hv:dn',
         u'hv:email',
@@ -320,4 +323,19 @@ class VMListControler:
             output_image = ImageModel()
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+
+    def verify_signature(self,filename,certdir='/etc/grid-security/certificates'):
+        anchor = TrustAnchor()
+        anchor.update_ca_list('/etc/grid-security/certificates/')
+        if not os.path.isfile(filename):
+            print "Can not open file: " + filename
+            return None
+        try:
+            signer_info = anchor.validate_file(filename)
+
+        except SmimeX509ValidationError as e:
+            print "Image signature is inavalid because: " + str(e)
+            #print  e
+            return None
+        return signer_info
 

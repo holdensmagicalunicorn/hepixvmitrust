@@ -15,6 +15,7 @@ setup(name='hepixvmitrust',
     author_email="owen.synge@desy.de",
     install_requires=[
        "M2Crypto>=0.16",
+       "smimeX509validation>=0.1.1",
         ],
     url = 'https://github.com/hepix-virtualisation/hepixvmitrust',
     packages = ['hepixvmitrust'],

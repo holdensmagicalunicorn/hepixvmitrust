@@ -21,6 +21,8 @@ else:
 import datetime
 from hepixvmitrust import VMListControler
 
+
+
 # import below purely to get the version number
 # if the command line tool will have different 
 # version number then the library we can take this
@@ -56,18 +58,19 @@ def main():
     actions = set([])
     listcontroler = VMListControler()
     p = optparse.OptionParser(version = "%prog " + version)
-    p.add_option('-j', '--json', action ='store', help='Path of the json output file')
-    p.add_option('-t', '--template', action ='store', help='Path of the json template file')
-    p.add_option('-a', '--add', action ='append', help='adds a VM image to the JSON')
-    p.add_option('-d', '--delete', action ='append', help='del a VM image to the JSON')
-    p.add_option('-g', '--generate', action ='append', help='generates a VM image metadata for image')
-    p.add_option('-i', '--image', action ='append', help='Sets the image to generates a VM image metadata')
+    p.add_option('-j', '--json', action ='store', help='Path of the json output file', metavar='OUTPUTFILE')
+    p.add_option('-t', '--template', action ='store', help='Path of the json template file', metavar='TEMPLATE')
+    p.add_option('-a', '--add', action ='append', help='adds a VM image to the JSON', metavar='IMAGEMETADATA')
+    p.add_option('-d', '--delete', action ='append', help='del a VM image to the JSON', metavar='IMAGEMETADATA')
+    p.add_option('-g', '--generate', action ='append', help='generates a VM image metadata for image', metavar='OUTPUTMETADATA')
+    p.add_option('-i', '--image', action ='append', help='Sets the image to generates a VM image metadata', metavar='IMAGEFILE')
     p.add_option('-l', '--list', action ='store_true', help='lists VM images in the JSON')
-    p.add_option('-k', '--signer_key', action ='store', help='path to signer key')
-    p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate')
-    p.add_option('-s', '--sign', action ='store', help='returns verbose output')
-    p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML')
-    
+    p.add_option('-k', '--signer_key', action ='store', help='path to signer key', metavar='SIGNERKEY')
+    p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate', metavar='SIGNERCERT')
+    p.add_option('-s', '--sign', action ='store', help='returns verbose output', metavar='SIGNEDOUTPUT')
+    p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML', metavar='FORMAT')
+    p.add_option('-v', '--verify', action = 'store', help='The filename of the image list to verify', metavar='IMAGELIST')   
+ 
     options, arguments = p.parse_args()
     template = 'imagelist.json'
     json_output = 'imagelist.json'
@@ -80,6 +83,8 @@ def main():
     signed_output = None
     list_images = False
     imagelist = []
+    verify_list_file = None
+
     if options.template:
         template = options.template
         actions.add('load_template')
@@ -112,6 +117,9 @@ def main():
     if options.image:
         imagelist = options.image
         actions.add('generate')
+    if options.verify:
+        verify_list_file = options.verify
+        actions.add('verifysignature')
         
     # Now process the actions.
     
@@ -153,7 +161,15 @@ def main():
             print "Output format type '" + format + "' not supported right now."
             print "Currently only supports JSON output RDF XML output may come later"
             sys.exit(1)
-    #test_things5()
-    #test_things5()
+    if actions.__contains__('verifysignature'):
+        # the following will raise an exception if the signature is not
+        # valid
+        signer_info = listcontroler.verify_signature(verify_list_file)
+        if signer_info:
+            print "Image signature valid. Signed by:"
+            print signer_info['signer_dn']
+        
+
+
 if __name__ == "__main__":
     main()
