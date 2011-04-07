@@ -71,6 +71,7 @@ def main():
     p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML', metavar='FORMAT')
     p.add_option('-v', '--verify', action = 'store', help='The filename of the image list to verify', metavar='IMAGELIST')   
  
+    
     options, arguments = p.parse_args()
     template = 'imagelist.json'
     json_output = 'imagelist.json'
